@@ -47,6 +47,11 @@ export interface flowExtensionNS {
             };
             endpointConfig: {
                 title: string;
+                certificate: {
+                    title: string;
+                    hint: string;
+                    uploaded: string;
+                };
             };
         };
     };
@@ -94,6 +99,7 @@ export interface flowExtensionNS {
         };
         accessConfig: {
             emptyInfo: string;
+            noCertificateInfo: string;
             treeLoadError: string;
             resetButton: string;
         };
@@ -168,6 +174,25 @@ export interface flowExtensionNS {
             readOnlyBadge: string;
             editTooltip: string;
             deleteTooltip: string;
+            usernameWriteWarning: string;
+            identityClaimWriteWarning: string;
+            encryption: {
+                title: string;
+                formReadOnly: string;
+                read: {
+                    title: string;
+                    notAllowed: string;
+                    markFirst: string;
+                    needCertificate: string;
+                    enabledDescription: string;
+                };
+                write: {
+                    title: string;
+                    notAllowed: string;
+                    markFirst: string;
+                    enabledDescription: string;
+                };
+            };
         };
         node: {
             readChip: string;
@@ -187,6 +212,24 @@ export interface flowExtensionNS {
             fetchError: {
                 message: string;
                 description: string;
+            };
+        };
+        addOrganizationAttributeModal: {
+            title: string;
+            subtitle: string;
+            noOptions: string;
+            invalidKey: string;
+            duplicateKey: string;
+            searchPlaceholder: string;
+            cancelButton: string;
+            addButton: string;
+            defineCustomAttribute: {
+                title: string;
+                keyLabel: string;
+                keyPlaceholder: string;
+                labelLabel: string;
+                labelPlaceholder: string;
+                addButton: string;
             };
         };
         addEntryModal: {

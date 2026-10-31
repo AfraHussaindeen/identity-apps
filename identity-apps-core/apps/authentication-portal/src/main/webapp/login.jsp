@@ -1,5 +1,5 @@
 <%--
-  ~ Copyright (c) 2023-2025, WSO2 LLC. (https://www.wso2.com).
+  ~ Copyright (c) 2023-2026, WSO2 LLC. (https://www.wso2.com).
   ~
   ~ WSO2 LLC. licenses this file to you under the Apache License,
   ~ Version 2.0 (the "License"); you may not use this file except
@@ -267,8 +267,10 @@
     }
 %>
 <%
+    boolean isCaptchaDisabledForApp = CaptchaUtil.isCaptchaDisabledForApplication(request.getParameter("spId"), tenantDomain);
     boolean reCaptchaEnabled = false;
-    if (request.getParameter("reCaptcha") != null && Boolean.parseBoolean(request.getParameter("reCaptcha"))) {
+    if (request.getParameter("reCaptcha") != null && Boolean.parseBoolean(request.getParameter("reCaptcha")) &&
+        !isCaptchaDisabledForApp) {
         reCaptchaEnabled = true;
     }
 
@@ -412,8 +414,8 @@
         } else {
             srURI = ServiceURLBuilder.create().addPath(AUTHENTICATION_ENDPOINT_LOGIN).build().getAbsolutePublicURL();
         }
-        String srprmstr = URLDecoder.decode(((String) request.getAttribute(JAVAX_SERVLET_FORWARD_QUERY_STRING)), UTF_8);
-        String srURLWithoutEncoding = srURI + "?" + srprmstr;
+        String srprmstr = URLDecoder.decode(StringUtils.defaultString(forwardedQueryString), UTF_8);
+        String srURLWithoutEncoding = StringUtils.isNotBlank(srprmstr) ? srURI + "?" + srprmstr : srURI;
         srURLEncodedURL= URLEncoder.encode(srURLWithoutEncoding, UTF_8);
     }
 %>
@@ -461,7 +463,8 @@
     <% } %>
 
     <%
-        boolean genericReCaptchaEnabled = CaptchaUtil.isGenericRecaptchaEnabledAuthenticator("IdentifierExecutor");
+        boolean genericReCaptchaEnabled = CaptchaUtil.isGenericRecaptchaEnabledAuthenticator("IdentifierExecutor") &&
+            !isCaptchaDisabledForApp;
         if (reCaptchaEnabled || reCaptchaResendEnabled || genericReCaptchaEnabled) {
             String reCaptchaAPI = CaptchaUtil.reCaptchaAPIURL();
     %>
@@ -524,7 +527,7 @@
                     String[] usernameSplitItems = usernameIdentifier.split("/");
                     String sanitizeUserName = usernameSplitItems[usernameSplitItems.length - 1];
                     String identifierFirstUserInput = request.getParameter(JS_IDENTIFIER_FIRST_USER_INPUT);
-                    if (StringUtils.isBlank(identifierFirstUserInput) || identifierFirstUserInput == "null") {
+                    if (StringUtils.isBlank(identifierFirstUserInput) || "null".equals(identifierFirstUserInput)) {
                         identifierFirstUserInput = sanitizeUserName;
                     }
                 %>

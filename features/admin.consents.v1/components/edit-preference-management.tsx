@@ -81,6 +81,12 @@ const CLAIMS_PARAMS: ClaimsGetParams = {
     sort: null
 };
 
+const CREATE_INITIAL_VALUES: PreferenceFormValuesInterface = {
+    attributes: [],
+    description: "",
+    name: ""
+};
+
 /**
  * Generates the next version label from the current label.
  *
@@ -135,11 +141,7 @@ export const EditPreferenceManagement: FunctionComponent<EditPreferenceManagemen
     const initialValues: PreferenceFormValuesInterface | null = useMemo(
         (): PreferenceFormValuesInterface | null => {
             if (isCreateMode) {
-                return {
-                    attributes: [],
-                    description: "",
-                    name: ""
-                };
+                return CREATE_INITIAL_VALUES;
             }
 
             if (!consent) {

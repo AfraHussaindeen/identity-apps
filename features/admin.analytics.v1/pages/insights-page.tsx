@@ -164,7 +164,8 @@ const InsightsPage: FunctionComponent = (): ReactElement => {
     // publisher lookup until then. A 404 (no publisher configured) is handled gracefully as disabled.
     const {
         data: moesifPublisher,
-        isLoading: isPublisherLoading
+        isLoading: isPublisherLoading,
+        mutate: mutateMoesifPublisher
     }: RequestResultInterface<MoesifPublisherInterface, RequestErrorInterface> =
         useGetMoesifPublisher(!!embeddingDomain);
 
@@ -203,6 +204,7 @@ const InsightsPage: FunctionComponent = (): ReactElement => {
             showUpgradeCard={ advancedAnalyticsUpgradeEnabled }
             termsOfServiceUrl={ termsOfServiceUrl }
             moesifTermsOfServiceUrl={ moesifTermsOfServiceUrl }
+            onAdvancedAnalyticsEnabled={ () => { mutateMoesifPublisher(); } }
         />
     );
 };

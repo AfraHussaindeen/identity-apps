@@ -34,6 +34,8 @@ import { CustomerDataServiceEndpointsInterface } from "@wso2is/admin.cds.v1/mode
 import { CertificatesResourceEndpointsInterface } from "@wso2is/admin.certificates.v1";
 import { ClaimResourceEndpointsInterface } from "@wso2is/admin.claims.v1/models/endpoints";
 import { ConnectionResourceEndpointsInterface } from "@wso2is/admin.connections.v1";
+import { DevicePoliciesResourceEndpointsInterface } from "@wso2is/admin.device-policies.v1/models/endpoints";
+import { DevicesResourceEndpointsInterface } from "@wso2is/admin.devices.v1/models/endpoints";
 import { FlowBuilderCoreResourceEndpointsInterface } from "@wso2is/admin.flow-builder-core.v1/models/endpoints";
 import { GroupsResourceEndpointsInterface } from "@wso2is/admin.groups.v1/models/endpoints";
 import { RemoteLoggingResourceEndpointsInterface } from "@wso2is/admin.logs.v1/models/endpoints";
@@ -101,6 +103,14 @@ export interface FeatureConfigInterface {
      */
     agents?: FeatureAccessConfigInterface;
     /**
+     * Device assurance policies feature.
+     */
+    devicePolicies?: FeatureAccessConfigInterface;
+    /**
+     * Device management feature.
+     */
+    devices?: FeatureAccessConfigInterface;
+    /**
      * Admin user management feature.
      */
     administrators?: FeatureAccessConfigInterface;
@@ -140,6 +150,16 @@ export interface FeatureConfigInterface {
      * Certificates configurations feature.
      */
     certificates?: FeatureAccessConfigInterface;
+    /**
+     * CLI settings feature. Gates the CLI Settings page which manages the CLI
+     * application and its user assignments.
+     */
+    cliSettings?: FeatureAccessConfigInterface;
+    /**
+     * Console settings feature. Currently the only consumer is the console-roles permissions UI,
+     * which reads the granular-console-permissions flag from its `disabledFeatures` list.
+     */
+    consoleSettings?: FeatureAccessConfigInterface;
     /**
      * Copilot AI assistant feature.
      */
@@ -197,6 +217,10 @@ export interface FeatureConfigInterface {
      */
     parentUserInvitation?: FeatureAccessConfigInterface;
     /**
+     * Connection sharing feature (share IdPs / connections with organizations).
+     */
+    connectionSharing?: FeatureAccessConfigInterface;
+    /**
      * Identity provider management feature.
      */
     identityProviders?: FeatureAccessConfigInterface;
@@ -204,6 +228,10 @@ export interface FeatureConfigInterface {
      * Identity provider groups feature.
      */
     identityProviderGroups?: FeatureAccessConfigInterface;
+    /**
+     * FAPI Security Policy feature.
+     */
+    fapi?: FeatureAccessConfigInterface;
     /**
      * Identity verification provider management feature.
      */
@@ -344,6 +372,10 @@ export interface FeatureConfigInterface {
      * Customer Data Service feature.
      */
     customerDataService?: FeatureAccessConfigInterface;
+    /**
+     * Presentation definitions (VP template) management feature.
+     */
+    presentationDefinitions?: FeatureAccessConfigInterface;
 }
 
 /**
@@ -468,6 +500,24 @@ interface ActionsUIConfigInterface {
 }
 
 /**
+ * CLI settings feature-specific properties.
+ *
+ * Configured under `cliSettings.properties` in the feature config. The CLI application
+ * name and client ID differ between Identity Server and Asgardeo, hence they are
+ * configurable per deployment.
+ */
+export interface CLISettingsPropertiesInterface {
+    /**
+     * Name of the application that backs the CLI tool.
+     */
+    applicationName?: string;
+    /**
+     * OAuth client ID of the CLI application.
+     */
+    clientId?: string;
+}
+
+/**
  * Portal UI config interface inheriting the common configs from core module.
  */
 export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfigInterface> {
@@ -482,6 +532,10 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
         enabled: boolean;
         plannedRollOutDate: string;
     };
+    /**
+     * Path to the favicon of the application.
+     */
+    appFaviconPath?: string;
     /**
      * How should the application templates be loaded.
      * If `LOCAL` is selected, app will resort to in app templates.
@@ -634,6 +688,11 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
      */
     isSignatureValidationCertificateAliasEnabled?: boolean;
     /**
+     * Send applications whose custom claim dialect renames at least one attribute to the local dialect
+     * attribute selector. Off by default; the scope grouped selector keeps handling them unless this is on.
+     */
+    isCustomClaimDialectRoutingEnabled?: boolean;
+    /**
      * Enable/Disable the custom claim mapping feature.
      */
     isCustomClaimMappingEnabled?: boolean;
@@ -782,6 +841,44 @@ export interface UIConfigInterface extends CommonUIConfigInterface<FeatureConfig
         enableLegacySelfRegistrationFlow?: boolean;
         enableLegacyInvitedUserRegistrationFlow?: boolean;
         enableLegacyPasswordRecoveryFlow?: boolean;
+        /**
+         * Limits of decision steps. They match the server's own configuration, which validates them on save.
+         */
+        conditionalBranching?: {
+            /**
+             * Maximum number of decision steps in a flow.
+             */
+            maxDecisionNodes?: number;
+            /**
+             * Maximum number of condition groups, combined with OR, in a branch's rule.
+             */
+            maxRulesCombinedWithOr?: number;
+            /**
+             * Maximum number of conditions, combined with AND, in a condition group.
+             */
+            maxExpressionsCombinedWithAnd?: number;
+        };
+        /**
+         * Limits of flow variables. They match the server's own configuration, which validates them on save.
+         */
+        variables?: {
+            /**
+             * Maximum number of headers a flow may define.
+             */
+            maxHeaders?: number;
+            /**
+             * Maximum number of runtime values a flow may define.
+             */
+            maxRuntimeValues?: number;
+            /**
+             * Maximum length of a value, or of an entry of an array value.
+             */
+            maxValueLength?: number;
+            /**
+             * Maximum number of entries in an array value.
+             */
+            maxArraySize?: number;
+        };
     };
     /**
      * Enable legacy session bound token behaviour.
@@ -894,6 +991,8 @@ export interface ServiceResourceEndpointsInterface extends AgentsResourceEndpoin
     RolesResourceEndpointsInterface,
     ApplicationsResourceEndpointsInterface,
     ConnectionResourceEndpointsInterface,
+    DevicePoliciesResourceEndpointsInterface,
+    DevicesResourceEndpointsInterface,
     ScopesResourceEndpointsInterface,
     SecretsManagementEndpoints,
     OrganizationResourceEndpointsInterface,
@@ -916,6 +1015,7 @@ export interface ServiceResourceEndpointsInterface extends AgentsResourceEndpoin
     ConsentMgtResourceEndpointsInterface {
 
     CORSOrigins: string;
+    presentationDefinitions: string;
     copilot: string;
     // TODO: Remove this endpoint and use ID token to get the details
     me: string;

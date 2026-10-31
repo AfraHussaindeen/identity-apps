@@ -38,6 +38,11 @@ import { isM2MInsightsFeatureEnabled } from "../utils/insights";
 
 interface OrgInsightsPagePropsInterface {
     moesifTermsOfServiceUrl?: string;
+    /**
+     * Invoked once advanced analytics has been successfully enabled, so the host can switch
+     * over to the embedded dashboard view.
+     */
+    onAdvancedAnalyticsEnabled?: () => void;
     showUpgradeCard?: boolean;
     termsOfServiceUrl?: string;
 }
@@ -45,6 +50,7 @@ interface OrgInsightsPagePropsInterface {
 const OrgInsightsPage: FunctionComponent<OrgInsightsPagePropsInterface> = (
     {
         moesifTermsOfServiceUrl = "",
+        onAdvancedAnalyticsEnabled,
         showUpgradeCard = false,
         termsOfServiceUrl = ""
     }: OrgInsightsPagePropsInterface
@@ -70,6 +76,9 @@ const OrgInsightsPage: FunctionComponent<OrgInsightsPagePropsInterface> = (
                 level: AlertLevels.SUCCESS,
                 message: t("insights:advancedAnalytics.notifications.enableSuccess.message")
             }));
+
+            // Hand control back to the host so it can move the user to the embedded dashboard.
+            onAdvancedAnalyticsEnabled?.();
         } catch (error: unknown) {
             const serverDescription: string | undefined =
                 (error as { response?: { data?: { description?: string } } })?.response?.data?.description;
@@ -83,7 +92,7 @@ const OrgInsightsPage: FunctionComponent<OrgInsightsPagePropsInterface> = (
         } finally {
             setIsEnablingAdvanced(false);
         }
-    }, [ dispatch, t ]);
+    }, [ dispatch, t, onAdvancedAnalyticsEnabled ]);
 
 
     const handleDurationChange = (event: SelectChangeEvent) => {
