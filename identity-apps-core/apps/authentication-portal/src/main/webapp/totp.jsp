@@ -313,7 +313,10 @@
             function updateTotpDigitBoxes(value) {
                 for (var i = 1; i <= <%= otpLength %>; i++) {
                     var box = document.getElementById('pincode-' + i);
-                    if (box) box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                    if (box) {
+                        box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                        box.classList.toggle('filled-pincode', value.length >= i);
+                    }
                 }
             }
 
@@ -341,12 +344,14 @@
             }
 
             function handleKeypress(e) {
+                // Allow Enter and other control keys so the form can still be submitted.
+                if (e.ctrlKey || e.metaKey || e.altKey || e.which < 32) return;
                 var char = String.fromCharCode(e.which);
                 if (!/\d/.test(char)) e.preventDefault();
             }
 
             function handleInput() {
-                var sanitized = totpInput.value.replace(/\D/g, '');
+                var sanitized = totpInput.value.replace(/\D/g, '').slice(0, <%= otpLength %>);
                 if (sanitized !== totpInput.value) totpInput.value = sanitized;
                 tokenField.value = sanitized;
                 updateTotpDigitBoxes(sanitized);

@@ -274,6 +274,11 @@
                 user-select: none;
                 -webkit-user-select: none;
                 -webkit-touch-callout: none;
+
+                /* Browser and branding autofill styles would otherwise paint over the digit boxes. */
+                &:-webkit-autofill {
+                    opacity: 0 !important;
+                }
             }
 
             div[id^="pincode-"] {
@@ -283,7 +288,11 @@
                 background: var(--asg-input-field-base-background-color, #fff);
                 font-size: 1em;
                 line-height: 1.21428571em;
-                color: var(--asg-input-field-base-text-color, rgba(0, 0, 0, .87));
+                color: rgba(191, 191, 191, .87);
+
+                &.filled-pincode {
+                    color: var(--asg-input-field-base-text-color, rgba(0, 0, 0, .87));
+                }
 
                 &.active-pincode {
                     border-color: var(--asg-colors-primary-main, #FF7300);

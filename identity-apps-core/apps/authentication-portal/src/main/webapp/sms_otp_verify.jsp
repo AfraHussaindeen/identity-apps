@@ -209,7 +209,6 @@
                                 <input type="text" id='OTPCode' name="OTPcode" size='30'
                                     autocomplete="one-time-code"
                                     autocorrect="off"
-                                    autocapitalize="off"
                                     spellcheck="false"/>
                                 <i id="password-eye" class="eye icon right-align password-toggle slash" onclick="showOTPCode()"></i>
                             </div>

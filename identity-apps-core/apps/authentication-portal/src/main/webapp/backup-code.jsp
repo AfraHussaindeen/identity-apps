@@ -261,7 +261,10 @@
             function updateBackupDigitBoxes(value) {
                 for (var i = 1; i <= <%= otpLength %>; i++) {
                     var box = document.getElementById('pincode-' + i);
-                    if (box) box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                    if (box) {
+                        box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                        box.classList.toggle('filled-pincode', value.length >= i);
+                    }
                 }
             }
 
@@ -289,7 +292,7 @@
             }
 
             function handleInput() {
-                var sanitized = backupInput.value.replace(/\s/g, '');
+                var sanitized = backupInput.value.replace(/\s/g, '').slice(0, <%= otpLength %>);
                 if (sanitized !== backupInput.value) backupInput.value = sanitized;
                 backupCodeField.value = sanitized;
                 updateBackupDigitBoxes(sanitized);

@@ -213,7 +213,7 @@
                                             maxlength="<%=otpLength%>"
                                             autocomplete="one-time-code"
                                             autocorrect="off"
-                                            autocapitalize="off"
+                                            autocapitalize="characters"
                                             spellcheck="false"
                                             autofocus
                                             data-testid="recovery-otp-page-segmented-otp-input"
@@ -235,7 +235,6 @@
                                             size='30'
                                             autocomplete="one-time-code"
                                             autocorrect="off"
-                                            autocapitalize="off"
                                             spellcheck="false"
                                             data-testid="recovery-otp-page-non-segmented-otp-input"
                                         />
@@ -305,6 +304,7 @@
                                             <input type="submit"
                                                 id="subButton"
                                                 disabled
+                                                onclick="sub(); return false;"
                                                 value="<%=IdentityManagementEndpointUtil.i18n(recoveryResourceBundle,
                                                     "sms.otp.submit.button")%>"
                                                 class="ui primary fluid large button" />
@@ -391,7 +391,10 @@
                 function updateDigitBoxes(value) {
                     for (var i = 1; i <= otpLen; i++) {
                         var box = document.getElementById('pincode-' + i);
-                        if (box) box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                        if (box) {
+                            box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                            box.classList.toggle('filled-pincode', value.length >= i);
+                        }
                     }
                 }
 
@@ -415,7 +418,7 @@
                 }
 
                 function handleInput() {
-                    var sanitized = OTPInput.value.replace(/\s/g, '');
+                    var sanitized = OTPInput.value.replace(/\s/g, '').slice(0, otpLen);
                     if (sanitized !== OTPInput.value) OTPInput.value = sanitized;
                     updateDigitBoxes(sanitized);
                     updateCursor(sanitized);
@@ -435,6 +438,14 @@
                 OTPInput.addEventListener('input', handleInput);
                 updateCursor(OTPInput.value);
             })();
+
+            function sub() {
+                var OTPInput = document.getElementById('OTPCode');
+                if (!OTPInput || OTPInput.value.length < parseInt(otpLength)) return;
+                // Disable during the initial submission to prevent double submissions.
+                document.getElementById("subButton").disabled = true;
+                document.getElementById("codeForm").submit();
+            }
 
             $(document).ready(function () {
                 $.fn.preventDoubleSubmission = function() {

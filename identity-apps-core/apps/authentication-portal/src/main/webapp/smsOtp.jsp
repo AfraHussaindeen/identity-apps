@@ -221,7 +221,7 @@
                                             maxlength="<%=otpLength%>"
                                             autocomplete="one-time-code"
                                             autocorrect="off"
-                                            autocapitalize="off"
+                                            autocapitalize="characters"
                                             spellcheck="false"
                                             inputmode="<%= isOnlyNumeric ? "numeric" : "text" %>"
                                             autofocus
@@ -238,9 +238,8 @@
                                         <input type="text" id='OTPCode' name="OTPcode" size='30'
                                             autocomplete="one-time-code"
                                             autocorrect="off"
-                                            autocapitalize="off"
-                                            spellcheck="false"
-                                            inputmode="<%= isOnlyNumeric ? "numeric" : "text" %>"/>
+                                            autocapitalize="characters"
+                                            spellcheck="false"/>
                                         <i id="password-eye" class="eye icon right-align password-toggle slash" onclick="showOTPCode()"></i>
                                     </div>
                                 <% } %>
@@ -396,7 +395,10 @@
                 function updateDigitBoxes(value) {
                     for (var i = 1; i <= otpLen; i++) {
                         var box = document.getElementById('pincode-' + i);
-                        if (box) box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                        if (box) {
+                            box.textContent = (value.length >= i) ? value[i - 1] : '·';
+                            box.classList.toggle('filled-pincode', value.length >= i);
+                        }
                     }
                 }
 
@@ -421,13 +423,14 @@
                 }
 
                 function handleKeypress(e) {
-                    if (!isOnlyNumeric) return;
+                    // Allow Enter and other control keys so the form can still be submitted.
+                    if (!isOnlyNumeric || e.ctrlKey || e.metaKey || e.altKey || e.which < 32) return;
                     var char = String.fromCharCode(e.which);
                     if (!/\d/.test(char)) e.preventDefault();
                 }
 
                 function handleInput() {
-                    var sanitized = isOnlyNumeric ? OTPInput.value.replace(/\D/g, '') : OTPInput.value.replace(/\s/g, '');
+                    var sanitized = (isOnlyNumeric ? OTPInput.value.replace(/\D/g, '') : OTPInput.value.replace(/\s/g, '')).slice(0, otpLen);
                     if (sanitized !== OTPInput.value) OTPInput.value = sanitized;
                     updateDigitBoxes(sanitized);
                     updateCursor(sanitized);
@@ -447,10 +450,17 @@
                 OTPInput.addEventListener('paste', handlePaste);
                 OTPInput.addEventListener('input', handleInput);
                 updateCursor(OTPInput.value);
+                <% if (reCaptchaEnabled) { %>
+                // The reCaptcha widget bound to the button enables it on render; keep it disabled until the code is complete.
+                var keepDisabledUntilComplete = function () {
+                    if (submitBtn && !submitBtn.disabled && OTPInput.value.length !== otpLen) submitBtn.disabled = true;
+                };
+                keepDisabledUntilComplete();
+                new MutationObserver(keepDisabledUntilComplete).observe(submitBtn, { attributes: true, attributeFilter: ['disabled'] });
+                <% } %>
             })();
 
-            // Shim retained so reCaptcha data-callback="sub" continues to submit the form
-            // when captcha is solved (segmented + reCaptcha-enabled case).
+            // Submits the segmented OTP; also the reCaptcha data-callback for the segmented flow.
             function sub() {
                 var OTPInput = document.getElementById('OTPCode');
                 if (!OTPInput || OTPInput.value.length < parseInt(otpLength)) return;
@@ -520,8 +530,8 @@
                 $('#subButton').click(function () {
                     <% if (!reCaptchaEnabled) { %>
                         sub();
-                        return false;
                     <% } %>
+                    return false;
                 });
             });
 
